@@ -24,3 +24,5 @@ spec:
       - name: linkding-data-claim
         persistentVolumeClaim:
           claimName: linkding-data-pvc
+      securityContext:
+        runAsUser: 33
