@@ -17,3 +17,10 @@ spec:
         image: sissbruecker/linkding:1.44.2
         ports:
           - containerPort: 9090
+       volumeMounts:
+        - name: mealie-data-claim
+          mountPath: /etc/linkding
+      volumes:
+      - name: linkding-data-claim
+        persistentVolumeClaim:
+          claimName: linkding-data
