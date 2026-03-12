@@ -18,15 +18,15 @@ spec:
       - name: linkding
         image: sissbruecker/linkding:1.44.2
         ports:
-          - containerPort: 9090
-      volumeMounts:
-        - name: mealie-data-claim
+        - containerPort: 9090
+        volumeMounts:
+        - name: linkding-data-claim
           mountPath: /etc/linkding/data
+        securityContext:
+          runAsUser: 33
+          runAsGroup: 33
+          allowPrivilegeEscalation: false
       volumes:
       - name: linkding-data-claim
         persistentVolumeClaim:
           claimName: linkding-data-pvc
-      securityContext:
-        runAsUser: 33
-        runAsGroup: 33
-        allowPrivilegeEscalation: false
