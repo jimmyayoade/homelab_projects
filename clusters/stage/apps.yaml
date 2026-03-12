@@ -1,6 +1,6 @@
 apiVersion: kustomize.toolkit.fluxcd.to/v1
 kind: Kustomization
-metedate:
+metedata:
   name: apps
   namespace: flux-system
 spec:
