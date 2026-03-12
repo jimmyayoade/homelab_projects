@@ -19,8 +19,8 @@ spec:
           - containerPort: 9090
       volumeMounts:
         - name: mealie-data-claim
-          mountPath: /etc/linkding
+          mountPath: /etc/linkding/data
       volumes:
       - name: linkding-data-claim
         persistentVolumeClaim:
-          claimName: linkding-data
+          claimName: linkding-data-pvc
