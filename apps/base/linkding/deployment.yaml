@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: linkding
-        image: slssbruecker/linkding:1.44.2
+        image: sissbruecker/linkding:1.44.2
         ports:
           - containerPort: 9090
