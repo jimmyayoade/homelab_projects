@@ -26,6 +26,9 @@ spec:
           runAsUser: 33
           runAsGroup: 33
           allowPrivilegeEscalation: false
+        envFrom:
+        - secretRef:
+          name: linkding-secret
       volumes:
       - name: linkding-data-claim
         persistentVolumeClaim:
