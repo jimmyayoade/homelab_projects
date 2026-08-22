@@ -1,3 +1,4 @@
+# This is helm install release
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -7,6 +8,7 @@ spec:
  interval: 30m
  chart:
    spec:
+     # Thsi is the chart
      chart: kube-prometheus-stack
      version: "83.4.0"
      # version: "83.x"
@@ -23,6 +25,7 @@ spec:
  driftDetection:
    mode: enabled
    ignore:
+     # Ignore "validated"
      - paths: ["/metadata/annotations/prometheus-operator-validated"]
        target:
          kind: PrometheusRule
