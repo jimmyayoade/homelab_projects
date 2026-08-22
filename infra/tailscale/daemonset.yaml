@@ -52,9 +52,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
 
-            # Names the device in your tailnet after the k8s node,
-            # so "pi4-worker" and "elitebook-k8s-01" show up as
-            # distinct, identifiable devices in the admin console.
+            # Names the device in your tailnet after the k8s node
             - name: TS_HOSTNAME
               valueFrom:
                 fieldRef:
@@ -68,8 +66,6 @@ spec:
 
             # TODO: replace with your actual LAN CIDR (and cluster
             # pod/service CIDRs if you also want those reachable).
-            # Same LAN on both nodes per your setup, so this can
-            # stay identical across nodes.
             - name: TS_ROUTES
               value: "192.168.101.0/24"
 
