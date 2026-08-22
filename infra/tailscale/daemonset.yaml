@@ -65,7 +65,6 @@ spec:
                 secretKeyRef:
                   name: tailscale-auth
                   key: TS_AUTHKEY
-                  optional: true
 
             # TODO: replace with your actual LAN CIDR (and cluster
             # pod/service CIDRs if you also want those reachable).
