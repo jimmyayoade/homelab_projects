@@ -16,9 +16,8 @@ spec:
     spec:
       serviceAccountName: tailscale
 
-      # Your Pi4 is almost certainly tainted as control-plane on a
-      # single-node cluster. Without this toleration the DaemonSet
-      # pod won't schedule there at all.
+      # Without this toleration the DaemonSet pod
+      # might not be scheduled on the contol node.
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
@@ -45,8 +44,7 @@ spec:
 
             # Each node gets its own Secret, named after the node
             # it's running on. This is what keeps two pods from
-            # fighting over one device identity. See role.yaml for
-            # why this can't be resourceName-restricted in RBAC.
+            # fighting over one device identity.
             - name: TS_KUBE_SECRET
               valueFrom:
                 fieldRef:
