@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale
+  namespace: tailscale
+rules:
+  # Tailscale needs to create a new Secret to hold state for a device
+  # it hasn't registered before.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+  # No resourceNames restriction here on purpose: each node's pod
+  # writes to a Secret named after its own node (see TS_KUBE_SECRET
+  # in daemonset.yaml), so the set of names isn't static. Scoped by
+  # namespace instead. If you want tighter scoping, list each node's
+  # secret name explicitly and update this Role every time you add
+  # a node.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "create", "patch"]

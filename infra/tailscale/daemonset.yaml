@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: tailscale-subnet-router
+  namespace: tailscale
+  labels:
+    app: tailscale
+spec:
+  selector:
+    matchLabels:
+      app: tailscale
+  template:
+    metadata:
+      labels:
+        app: tailscale
+    spec:
+      serviceAccountName: tailscale
+
+      # Your Pi4 is almost certainly tainted as control-plane on a
+      # single-node cluster. Without this toleration the DaemonSet
+      # pod won't schedule there at all.
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+
+      # Needed so the pod can route traffic onto the physical LAN,
+      # not just the pod/service network. Without this, traffic
+      # arriving over the tailscale tunnel has no path out the
+      # node's real NIC.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      containers:
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:latest
+          imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+          env:
+            - name: TS_USERSPACE
+              value: "false"
+
+            # Each node gets its own Secret, named after the node
+            # it's running on. This is what keeps two pods from
+            # fighting over one device identity. See role.yaml for
+            # why this can't be resourceName-restricted in RBAC.
+            - name: TS_KUBE_SECRET
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+
+            # Names the device in your tailnet after the k8s node,
+            # so "pi4-worker" and "elitebook-k8s-01" show up as
+            # distinct, identifiable devices in the admin console.
+            - name: TS_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-auth
+                  key: TS_AUTHKEY
+                  optional: true
+
+            # TODO: replace with your actual LAN CIDR (and cluster
+            # pod/service CIDRs if you also want those reachable).
+            # Same LAN on both nodes per your setup, so this can
+            # stay identical across nodes.
+            - name: TS_ROUTES
+              value: "192.168.101.0/24"
+
+            - name: TS_EXTRA_ARGS
+              value: "--advertise-tags=tag:k8s-homelab"
+
+          volumeMounts:
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
+
+      volumes:
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun
