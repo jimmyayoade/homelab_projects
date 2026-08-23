@@ -68,7 +68,7 @@ spec:
               value: "192.168.101.0/24"
 
             - name: TS_EXTRA_ARGS
-              value: "--advertise-tags=tag:k8s-homelab"
+              value: "--advertise-tags=tag:k8s-homelab --advertise-exit-node"
 
           volumeMounts:
             - name: dev-net-tun
