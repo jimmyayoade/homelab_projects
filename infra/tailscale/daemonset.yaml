@@ -19,8 +19,8 @@ spec:
       # Without this toleration the DaemonSet pod
       # might not be scheduled on the contol node.
       tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
 
       # Needed so the pod can route traffic onto the physical LAN,
       # not just the pod/service network. Without this, traffic
@@ -30,51 +30,76 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
 
       containers:
-        - name: tailscale
-          image: ghcr.io/tailscale/tailscale:latest
-          imagePullPolicy: Always
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-                - NET_RAW
-          env:
-            - name: TS_USERSPACE
-              value: "false"
+      - name: tailscale
+        image: ghcr.io/tailscale/tailscale@sha256:8c42c4574ab066384fcb72f69e086a2ff1dd3652eb6f56856cee34bcf0d2f680
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - all
+            add:
+            - NET_ADMIN
+            - NET_RAW
+        env:
+        - name: TS_USERSPACE
+          value: "false"
 
-            # Each node gets its own Secret, named after the node
-            # it's running on. This is what keeps two pods from
-            # fighting over one device identity.
-            - name: TS_KUBE_SECRET
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
+        # Each node gets its own Secret, named after the node
+        # it's running on. This is what keeps two pods from
+        # fighting over one device identity since its being deployed
+        # as a daemonset
+        - name: TS_KUBE_SECRET
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
 
-            # Names the device in your tailnet after the k8s node
-            - name: TS_HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
+        # Names the device in your tailnet after the k8s node
+        - name: TS_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
 
-            - name: TS_AUTHKEY
-              valueFrom:
-                secretKeyRef:
-                  name: tailscale-auth
-                  key: TS_AUTHKEY
+        # Authorizes without logining in with a browser 
+        - name: TS_AUTHKEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-auth
+              key: TS_AUTHKEY
 
-            # TODO: replace with your actual LAN CIDR (and cluster
-            # pod/service CIDRs if you also want those reachable).
-            - name: TS_ROUTES
-              value: "192.168.101.0/24"
+        # Replace with your actual LAN CIDR (and cluster
+        # pod/service CIDRs if you also want those reachable).
+        - name: TS_ROUTES
+          value: "192.168.101.0/24"
 
-            - name: TS_EXTRA_ARGS
-              value: "--advertise-tags=tag:jim-kube --advertise-exit-node"
+        # Tags ned to be created in the console or the pod would
+        # be stuck in a crashloop.
+        - name: TS_EXTRA_ARGS
+          value: "--advertise-tags=tag:jim-kube --advertise-exit-node"
 
-          volumeMounts:
-            - name: dev-net-tun
-              mountPath: /dev/net/tun
+        # Helps with proper logging.
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+
+        volumeMounts:
+        - name: dev-net-tun-vol
+          mountPath: /dev/net/tun
+        - name: tmp-dir-vol
+          mountPath: /tmp
+        - name: tailscale-vol
+          mountPath: /va/lib/tailscale
 
       volumes:
-        - name: dev-net-tun
-          hostPath:
-            path: /dev/net/tun
+      - name: dev-net-tun-vol
+        hostPath:
+          path: /dev/net/tun
+      - name: tmp-dir-vol
+        emptyDir: {}
+      - name: tailscale-vol
+        emptyDir: {}
