@@ -4,9 +4,9 @@ metadata:
   name: tailscale
   namespace: tailscale
 subjects:
-  - kind: ServiceAccount
-    name: tailscale
-    namespace: tailscale
+- kind: ServiceAccount
+  name: tailscale
+  namespace: tailscale
 roleRef:
   kind: Role
   name: tailscale

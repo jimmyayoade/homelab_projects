@@ -5,13 +5,13 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: booky.jimmyalabs.org
-      http:
-        paths:
-          - backend:
-              service:
-                name: linkding
-                port:
-                  number: 9090
-            path: /
-            pathType: Prefix
+  - host: booky.jimmyalabs.org
+    http:
+      paths:
+      - backend:
+          service:
+            name: linkding
+            port:
+              number: 9090
+        path: /
+        pathType: Prefix
