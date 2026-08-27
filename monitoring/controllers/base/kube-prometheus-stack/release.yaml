@@ -5,30 +5,30 @@ metadata:
   name: kube-prometheus-stack
   namespace: monitoring
 spec:
- interval: 30m
- chart:
-   spec:
-     # Thsi is the chart
-     chart: kube-prometheus-stack
-     version: "83.4.0"
-     # version: "83.x"
-     # version: "83.4.*"
-     sourceRef:
-       kind: HelmRepository
-       name: kube-prometheus-stack
-       namespace: monitoring
-     interval: 12h
- install:
-   crds: Create
- upgrade:
-   crds: CreateReplace
- driftDetection:
-   mode: enabled
-   ignore:
-     # Ignore "validated"
-     - paths: ["/metadata/annotations/prometheus-operator-validated"]
-       target:
-         kind: PrometheusRule
- values:
-   grafana:
-     adminPassword: pass123
+  interval: 30m
+  chart:
+    spec:
+     # This is the chart
+      chart: kube-prometheus-stack
+      version: "83.4.0"
+      # version: "83.x"
+      # version: "83.4.*"
+      sourceRef:
+        kind: HelmRepository
+        name: kube-prometheus-stack
+        namespace: monitoring
+      interval: 12h
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  driftDetection:
+    mode: enabled
+    ignore:
+      # Ignore "validated"
+    - paths: ["/metadata/annotations/prometheus-operator-validated"]
+      target:
+        kind: PrometheusRule
+  values:
+    grafana:
+      adminPassword: pass123
