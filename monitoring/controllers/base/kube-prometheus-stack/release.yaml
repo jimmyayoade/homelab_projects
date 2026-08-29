@@ -37,7 +37,7 @@ spec:
         ingressClassName: traefik
         hosts: 
         - grafana.jimmyalabs.org
-        tls: []
-        #- secretName:
-        #  hosts:
-        #  - grafana.jimmyalabs.org
+        tls: 
+        - secretName: grfana-tls-secret.yaml
+          hosts:
+          - grafana.jimmyalabs.org
