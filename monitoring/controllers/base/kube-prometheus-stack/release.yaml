@@ -38,6 +38,6 @@ spec:
         hosts: 
         - grafana.jimmyalabs.org
         tls: 
-        - secretName: grfana-tls-secret.yaml
+        - secretName: grafana-tls-secret
           hosts:
           - grafana.jimmyalabs.org
