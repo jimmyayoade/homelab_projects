@@ -36,8 +36,8 @@ spec:
         enabled: true
         ingressClassName: traefik
         hosts: 
-        - grafana.jimmyalabs.com
+        - grafana.jimmyalabs.org
         tls: []
         #- secretName:
         #  hosts:
-        #  - grafana.jimmyalabs.com
+        #  - grafana.jimmyalabs.org
