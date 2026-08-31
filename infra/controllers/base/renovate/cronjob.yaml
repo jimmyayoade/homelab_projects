@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: renovate
+  namespace: renovate
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      name: renovate
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - image: renovate/renovate:latest
+            name: renovate
+            args:
+            - jimmyayoade/homelab_projects
+            envFrom:
+            - secretRef:
+                name: renovate-token
+            - configMapRef:
+                name: renovate-configmap
+              
