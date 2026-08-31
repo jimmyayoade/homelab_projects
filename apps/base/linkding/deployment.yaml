@@ -16,7 +16,7 @@ spec:
         fcGroup: 33
       containers:
       - name: linkding
-        image: sissbruecker/linkding:1.44.2
+        image: sissbruecker/linkding:1.46.2
         ports:
         - containerPort: 9090
         volumeMounts:
