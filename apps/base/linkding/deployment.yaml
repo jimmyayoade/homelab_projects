@@ -13,7 +13,7 @@ spec:
         app: linkding
     spec:
       securityContext:
-        fcGroup: 33
+        fsGroup: 33
       containers:
       - name: linkding
         image: sissbruecker/linkding:1.46.2

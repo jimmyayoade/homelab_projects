@@ -13,7 +13,7 @@ spec:
         app: audiobookshelf
     spec:
       securityContext:
-        fcGroup: 1000
+        fsGroup: 1000
       containers:
       - name: audiobookshelf
         image: ghcr.io/advplyr/audiobookshelf@sha256:1eef6716183c52abafe5405e7d6be8390248ecd59c7488c44af871757ac8fc4d
