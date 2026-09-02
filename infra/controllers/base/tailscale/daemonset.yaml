@@ -93,7 +93,7 @@ spec:
         - name: tmp-dir-vol
           mountPath: /tmp
         - name: tailscale-vol
-          mountPath: /va/lib/tailscale
+          mountPath: /var/lib/tailscale
 
       volumes:
       - name: dev-net-tun-vol
