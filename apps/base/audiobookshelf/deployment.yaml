@@ -34,8 +34,6 @@ spec:
           runAsGroup: 1000
           allowPrivilegeEscalation: false
         envFrom:
-        #- secretRef:
-        #    name: 
         - configMapRef:
             name: audiobookshelf-configmap
       volumes:
