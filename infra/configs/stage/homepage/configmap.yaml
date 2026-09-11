@@ -22,12 +22,12 @@ data:
   services.yaml: |
     - My First Group:
         - My First Service:
-            href: https://bookmark.jimmyalabs.org
+            href: https://bookmark.jimmyalabs.org/
             description: This is for bookmarks public
 
     - My Second Group:
         - My Second Service:
-            href: http://abs.jimmyalabs.org
+            href: http://abs.jimmyalabs.org/
             description: this is for audiobooks local
 
     - My Third Group:
