@@ -44,10 +44,10 @@ spec:
             fieldRef:
               fieldPath: status.podIP
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "$(MY_POD_IP):3000,homepage.jimmyalabs.org" # gethomepage.dev # See gethomepage.dev/installation/#homepage_allowed_hosts . Value before the comma is required for the k8s probe
+          value: "$(MY_POD_IP):3001,homepage.jimmyalabs.org" # gethomepage.dev # See gethomepage.dev/installation/#homepage_allowed_hosts . Value before the comma is required for the k8s probe
         ports:
         - name: http
-          containerPort: 3000
+          containerPort: 3001
           protocol: TCP
         livenessProbe:
           httpGet:
@@ -56,6 +56,8 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 15
         volumeMounts:
+        - mountPath: /app/config
+          name: writable-config-dir
         - mountPath: /app/config/custom.js
           name: homepage-config
           subPath: custom.js
@@ -83,6 +85,8 @@ spec:
         - mountPath: /app/config/logs
           name: logs
       volumes:
+      - name: writable-config-dir
+        emptyDir: {}
       - name: homepage-config
         configMap:
           name: homepage
