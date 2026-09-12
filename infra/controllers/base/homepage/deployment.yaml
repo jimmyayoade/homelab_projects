@@ -22,6 +22,8 @@ spec:
       automountServiceAccountToken: true
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: homepage
         image: ghcr.io/gethomepage/homepage@sha256:753eeb0cc22ab7baad39ed47cbd1aae14e193dd1b264e965f193a9ea1d1e1bdd
