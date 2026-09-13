@@ -28,7 +28,20 @@ spec:
       # node's real NIC.
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-
+      
+      # initContainers:
+      # - name: sysctl-box
+      #  image: busybox@sha256:fc6dddc4c44b1bfe37f41cae8e67d1693828e8f42a91862816d7953e2c9d3f23
+      #  securityContext:
+      #    privileged: true
+      #  command: ["/bin/sh"]
+      #  args:
+      #  - -c
+      #  - sysctl -w net.ipv4.ip_forward=1 net.ipv6.conf.all.forwarding=1
+      #  resources:
+      #    requests:
+      #      cpu: 1m
+      #      memory: 1Mi
       containers:
       - name: tailscale
         image: ghcr.io/tailscale/tailscale@sha256:8c42c4574ab066384fcb72f69e086a2ff1dd3652eb6f56856cee34bcf0d2f680
