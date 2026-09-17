@@ -19,21 +19,30 @@ data:
         - Github:
             - abbr: GH
               href: https://github.com/
+        - Gitlab:
+            - abbr: GL
+              href: https://gitlab.com/
   services.yaml: |
     - My First Group:
         - My First Service:
             href: https://bookmark.jimmyalabs.org/
             description: This is for bookmarks public
 
-    - My Second Group:
-        - My Second Service:
+    - My Home Services:
+        - Audio Book Shelf:
             href: http://abs.jimmyalabs.org/
             description: this is for audiobooks local
+        - Kube-Prometheus-stack
+            href: grafana.jimmyalabs.org
+            description: monitoring dashboard
 
-    - My Third Group:
-        - My Third Service:
-            href: http://localhost/
-            description: Homepage is 😎
+    - Bookmaks:
+        - Hacker News:
+            href: https://news.ycombinator.com/
+            description: News about hacks.
+        - Drive and Listen
+            href: https://driveandlisten.app
+            description: drive and listen in various cities.
   widgets.yaml: |
     - kubernetes:
         cluster:
