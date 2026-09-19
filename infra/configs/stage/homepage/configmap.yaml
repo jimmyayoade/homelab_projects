@@ -32,7 +32,7 @@ data:
         - Audio Book Shelf:
             href: http://abs.jimmyalabs.org/
             description: this is for audiobooks local
-        - Kube-Prometheus-stack
+        - Kube Prometheus stack
             href: grafana.jimmyalabs.org
             description: monitoring dashboard
 
@@ -41,7 +41,7 @@ data:
             href: https://news.ycombinator.com/
             description: News about hacks.
         - Drive and Listen
-            href: https://driveandlisten.app
+            href: https://driveandlisten.app/
             description: drive and listen in various cities.
   widgets.yaml: |
     - kubernetes:
