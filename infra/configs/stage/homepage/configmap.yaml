@@ -32,7 +32,7 @@ data:
         - Audio Book Shelf:
             href: http://abs.jimmyalabs.org/
             description: this is for audiobooks local
-        - Kube Prometheus stack
+        - Kube Prometheus stack:
             href: grafana.jimmyalabs.org
             description: monitoring dashboard
 
