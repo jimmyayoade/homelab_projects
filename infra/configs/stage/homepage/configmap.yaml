@@ -40,7 +40,7 @@ data:
         - Hacker News:
             href: https://news.ycombinator.com/
             description: News about hacks.
-        - Drive and Listen
+        - Drive and Listen:
             href: https://driveandlisten.app/
             description: drive and listen in various cities.
   widgets.yaml: |
