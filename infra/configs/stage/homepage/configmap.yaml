@@ -18,10 +18,10 @@ data:
     - Developer:
         - Github:
             - abbr: GH
-              href: https://github.com/
+              href: https://github.com/jimmyayoade/
         - Gitlab:
             - abbr: GL
-              href: https://gitlab.com/
+              href: https://gitlab.com/jimmyayoade/
   services.yaml: |
     - My First Group:
         - My First Service:
@@ -36,7 +36,7 @@ data:
             href: grafana.jimmyalabs.org
             description: monitoring dashboard
 
-    - Bookmaks:
+    - Bookmarks:
         - Hacker News:
             href: https://news.ycombinator.com/
             description: News about hacks.
