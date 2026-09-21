@@ -1,0 +1,36 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+  namespace: reloader
+spec:
+  interval: 12h
+  chart:
+    spec:
+      chart: reloader
+      version: "2.2.x"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: reloader
+      interval: 24h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      digest: sha256:0a27b89b62a4207e955afeb94a515145ea8f7a24ae6b22a60b9aff54edefb12a
+    reloader:
+      watchGlobally: true
+      enableHA: true
+      readOnlyRootFilesystem: true
+      deployment:
+        replicas: 3
+      containerSecurityContext:
+        capabilities:
+          drop:
+          - ALL
+        allowPrivilegeEscalation: false
