@@ -189,6 +189,7 @@ SOPS_AGE_KEY_FILE=/path/to/age.agekey sops --config clusters/stage/.sops.yaml <f
 - [ ] CI on pull requests: `kustomize build` + `kubeconform` for every overlay
 - [ ] Pin the remaining `:latest` images (`cloudflared`, `renovate`)
 - [ ] Resource requests/limits and readiness probes on every workload
+- [ ] Switch from Flannel to Cilium as my CNI
 - [ ] NetworkPolicies between namespaces
 - [ ] Backups for PVCs (e.g. Velero)
 - [ ] Add a `prod` overlay alongside `stage`
