@@ -25,8 +25,8 @@ spec:
           mountPath: /config
         - name: audiobookshelf-metadata-claim
           mountPath: /metadata
-        - name: audiobookshelf-podcasts-claim
-          mountPath: /podcasts
+        - name: audiobookshelf-audiobooks-claim
+          mountPath: /audiobooks
         securityContext:
           runAsUser: 1000
           runAsGroup: 1000
