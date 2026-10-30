@@ -25,8 +25,6 @@ spec:
           mountPath: /config
         - name: audiobookshelf-metadata-claim
           mountPath: /metadata
-        - name: audiobookshelf-audiobooks-claim
-          mountPath: /audiobooks
         - name: audiobookshelf-podcasts-claim
           mountPath: /podcasts
         securityContext:
@@ -43,9 +41,6 @@ spec:
       - name: audiobookshelf-audiobooks-claim
         persistentVolumeClaim:
           claimName: audiobookshelf-audiobooks-pvc
-      - name: audiobookshelf-podcasts-claim
-        persistentVolumeClaim:
-          claimName: audiobookshelf-podcasts-pvc
       - name: audiobookshelf-config-claim
         persistentVolumeClaim:
           claimName: audiobookshelf-config-pvc
