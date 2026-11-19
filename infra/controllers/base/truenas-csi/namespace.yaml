@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: truenas-csi
+  labels:
+    # The node plugin mounts volumes on the host, so it runs privileged
+    pod-security.kubernetes.io/enforce: privileged

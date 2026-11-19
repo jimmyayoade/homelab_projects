@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: truenas-csi
+  namespace: truenas-csi
+spec:
+  values:
+    truenas:
+      url: wss://192.168.101.250
+      defaultPool: ayoade_pool1
+      # TrueNAS ships a self-signed certificate issued for localhost
+      insecureSkipTLS: true
+    # Retain keeps a released volume's dataset on the NAS. 
+    storageClasses:
+    - name: truenas-iscsi
+      reclaimPolicy: Retain
+      allowVolumeExpansion: true
+      volumeBindingMode: Immediate
+      parameters:
+        protocol: iscsi
+        pool: ayoade_pool1
+        datasetPath: kube_nas/iscsi
+        compression: LZ4
+    - name: truenas-nfs
+      reclaimPolicy: Retain
+      allowVolumeExpansion: true
+      volumeBindingMode: Immediate
+      parameters:
+        protocol: nfs
+        pool: ayoade_pool1
+        datasetPath: kube_nas/nfs
+        compression: LZ4
+        nfs.networks: 192.168.101.0/24

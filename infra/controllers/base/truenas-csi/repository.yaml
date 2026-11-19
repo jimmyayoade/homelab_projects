@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: truenas-csi
+  namespace: truenas-csi
+spec:
+  interval: 24h
+  url: https://raw.githubusercontent.com/truenas/truenas-csi/master/charts

@@ -92,6 +92,7 @@ flowchart LR
 | [Tailscale](https://tailscale.com/) | infra | Subnet router and exit node for remote access | Plain manifests (DaemonSet) |
 | [Renovate](https://docs.renovatebot.com/) | infra | Automated dependency update PRs | CronJob |
 | [Reloader](https://github.com/stakater/Reloader) | infra | Restarts pods on config/secret changes | Flux `HelmRelease` |
+| [TrueNAS CSI](https://github.com/truenas/truenas-csi) | infra | Provisions PVCs on the TrueNAS NAS over iSCSI (`truenas-iscsi`) and NFS (`truenas-nfs`) | Flux `HelmRelease` |
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | monitoring | Prometheus, Alertmanager and Grafana | Flux `HelmRelease` (drift detection on) |
 | Cloudflare Tunnel (`cloudflared`) | apps | Public access without open ports | Plain manifests, per app |
 
@@ -114,7 +115,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   │   └── linkding/
 │   └── stage/                  # + cloudflared tunnel, encrypted tunnel creds, temporary Ingress
 ├── infra/
-│   ├── controllers/            # Cluster services: homepage, reloader, renovate, tailscale
+│   ├── controllers/            # Cluster services: homepage, reloader, renovate, tailscale, truenas-csi
 │   │   ├── base/
 │   │   └── stage/
 │   └── configs/                # Configuration for those services (homepage config)

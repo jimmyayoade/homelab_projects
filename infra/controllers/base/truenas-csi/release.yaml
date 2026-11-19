@@ -1,0 +1,42 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: truenas-csi
+  namespace: truenas-csi
+spec:
+  interval: 12h
+  chart:
+    spec:
+      chart: truenas-csi
+      version: "1.4.0"
+      sourceRef:
+        kind: HelmRepository
+        name: truenas-csi
+        namespace: truenas-csi
+      interval: 24h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    truenas:
+      existingSecret: truenas-csi-api-key
+      existingSecretKey: api-key
+    # The chart has no digest field, so the digest rides on the tag
+    image:
+      driver:
+        tag: v1.4.0@sha256:f388c67bee73b935fece1f290d199e17b0c3249da79e07a17c87c940f04952d5
+      csiProvisioner:
+        tag: v6.1.1@sha256:d992c36d4ddd6dfa37c81b487e5a673920e1360e2977eb779051df8da1c5787d
+      csiAttacher:
+        tag: v4.11.0@sha256:b74b05b39501565022883fc128002b4cb857a7bb6c858606bcb3fdedba0b0b80
+      csiSnapshotter:
+        tag: v8.5.0@sha256:da081c27e8a6d91f36042c1942362d0515ced8d06e18c11b8f893e58c4d6d797
+      csiResizer:
+        tag: v2.1.0@sha256:589e525cddef6d768e68da1f0bc9ffd0a24bf3add3dd010648eb7189976fde79
+      nodeDriverRegistrar:
+        tag: v2.16.0@sha256:ab482308a4921e28a6df09a16ab99a457e9af9641ff44fb1be1a690d07ce8b70
+      livenessProbe:
+        tag: v2.18.0@sha256:c4cc074199c045dd73ab85f28897e2a32f4d6f38ffdba4f3b13b8007ccbd3570
