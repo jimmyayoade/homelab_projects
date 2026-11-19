@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: tailscale
 resources:
 - ../../base/tailscale
+- auth-secret.yaml

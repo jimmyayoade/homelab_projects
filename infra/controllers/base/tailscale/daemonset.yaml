@@ -15,33 +15,15 @@ spec:
         app: tailscale
     spec:
       serviceAccountName: tailscale
-
-      # Without this toleration the DaemonSet pod
-      # might not be scheduled on the contol node.
       tolerations:
       - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
-
       # Needed so the pod can route traffic onto the physical LAN,
       # not just the pod/service network. Without this, traffic
       # arriving over the tailscale tunnel has no path out the
       # node's real NIC.
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      
-      # initContainers:
-      # - name: sysctl-box
-      #  image: busybox@sha256:fc6dddc4c44b1bfe37f41cae8e67d1693828e8f42a91862816d7953e2c9d3f23
-      #  securityContext:
-      #    privileged: true
-      #  command: ["/bin/sh"]
-      #  args:
-      #  - -c
-      #  - sysctl -w net.ipv4.ip_forward=1 net.ipv6.conf.all.forwarding=1
-      #  resources:
-      #    requests:
-      #      cpu: 1m
-      #      memory: 1Mi
       containers:
       - name: tailscale
         image: ghcr.io/tailscale/tailscale@sha256:72c1e19e0aedca96b8533bbb0b4368564410ff20b17e53b804eb6c1f04a31be4
@@ -50,14 +32,13 @@ spec:
           readOnlyRootFilesystem: true
           capabilities:
             drop:
-            - all
+            - ALL
             add:
             - NET_ADMIN
             - NET_RAW
         env:
         - name: TS_USERSPACE
           value: "false"
-
         # Each node gets its own Secret, named after the node
         # it's running on. This is what keeps two pods from
         # fighting over one device identity since its being deployed
@@ -66,30 +47,20 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-
         # Names the device in your tailnet after the k8s node
         - name: TS_HOSTNAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-
-        # Authorizes without logining in with a browser 
+        # Read from the mounted Secret, so the key isn't in the environment
         - name: TS_AUTHKEY
-          valueFrom:
-            secretKeyRef:
-              name: tailscale-auth
-              key: TS_AUTHKEY
-
-        # Replace with your actual LAN CIDR (and cluster
-        # pod/service CIDRs if you also want those reachable).
+          value: file:/etc/tailscale-auth/TS_AUTHKEY
         - name: TS_ROUTES
           value: "192.168.101.0/24"
-
-        # Tags ned to be created in the console or the pod would
+        # Tags need to be created in the console or the pod would
         # be stuck in a crashloop.
         - name: TS_EXTRA_ARGS
           value: "--advertise-tags=tag:jim-kube --advertise-exit-node"
-
         # Helps with proper logging.
         - name: POD_NAME
           valueFrom:
@@ -99,7 +70,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.uid
-
         volumeMounts:
         - name: dev-net-tun-vol
           mountPath: /dev/net/tun
@@ -107,7 +77,9 @@ spec:
           mountPath: /tmp
         - name: tailscale-vol
           mountPath: /var/lib/tailscale
-
+        - name: auth-key-vol
+          mountPath: /etc/tailscale-auth
+          readOnly: true
       volumes:
       - name: dev-net-tun-vol
         hostPath:
@@ -116,3 +88,7 @@ spec:
         emptyDir: {}
       - name: tailscale-vol
         emptyDir: {}
+      - name: auth-key-vol
+        secret:
+          secretName: tailscale-auth
+          defaultMode: 0400
