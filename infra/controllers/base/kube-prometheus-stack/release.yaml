@@ -1,4 +1,3 @@
-# This is helm install release
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,7 +7,6 @@ spec:
   interval: 30m
   chart:
     spec:
-     # This is the chart
       chart: kube-prometheus-stack
       version: "83.4.0"
       # version: "83.x"
@@ -20,24 +18,22 @@ spec:
       interval: 12h
   install:
     crds: Create
+    remediation:
+      retries: 3
   upgrade:
     crds: CreateReplace
+    remediation:
+      retries: 3
   driftDetection:
     mode: enabled
     ignore:
-      # Ignore "validated"
+    # Ignore "validated"
     - paths: ["/metadata/annotations/prometheus-operator-validated"]
       target:
         kind: PrometheusRule
   values:
     grafana:
-      adminPassword: pass123  
-      ingress:
-        enabled: true
-        ingressClassName: traefik
-        hosts: 
-        - grafana.jimmyalabs.org
-        tls: 
-        - secretName: grafana-tls-secret
-          hosts:
-          - grafana.jimmyalabs.org
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password

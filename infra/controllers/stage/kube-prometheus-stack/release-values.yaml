@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  values:
+    grafana:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - grafana.jimmyalabs.org
+        tls:
+        - secretName: grafana-tls-secret
+          hosts:
+          - grafana.jimmyalabs.org
