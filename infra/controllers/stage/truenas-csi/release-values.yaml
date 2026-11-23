@@ -10,7 +10,7 @@ spec:
       defaultPool: ayoade_pool1
       # TrueNAS ships a self-signed certificate issued for localhost
       insecureSkipTLS: true
-    # Retain keeps a released volume's dataset on the NAS. 
+    # Retain keeps a released volume's dataset on the NAS.
     storageClasses:
     - name: truenas-iscsi
       reclaimPolicy: Retain
