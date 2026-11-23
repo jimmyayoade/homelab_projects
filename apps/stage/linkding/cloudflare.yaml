@@ -44,22 +44,3 @@ spec:
           items:
           - key: config.yaml
             path: config.yaml
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cloudflared
-data:
-  config.yaml: |
-    tunnel: bookmark
-    credentials-file: /etc/cloudflared/creds/credential.json
-    metrics: 0.0.0.0:2000
-    no-autoupdate: true
-    ingress:
-    - hostname: bookmark.jimmyalabs.org
-      service: http://linkding:9090
-
-    # cloudflared refuses to start unless the last rule has no hostname
-    # (it must match everything), so without this the pods crashloop.
-    # Anything not matched above gets a 404.
-    - service: http_status:404

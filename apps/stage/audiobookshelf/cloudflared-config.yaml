@@ -1,0 +1,12 @@
+tunnel: audiobook
+credentials-file: /etc/cloudflared/creds/credential.json
+metrics: 0.0.0.0:2000
+no-autoupdate: true
+ingress:
+- hostname: audiobook.jimmyalabs.org
+  service: http://audiobookshelf:3005
+
+# cloudflared refuses to start unless the last rule has no hostname
+# (it must match everything), so without this the pods crashloop.
+# Anything not matched above gets a 404.
+- service: http_status:404

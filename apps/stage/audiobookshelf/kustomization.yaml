@@ -6,3 +6,9 @@ resources:
 - cloudflare.yaml
 - cloudflare-secret.yaml
 - ingress.yaml
+# The content hash kustomize adds to the name changes the Deployment's
+# pod template, so a config edit rolls the cloudflared pods by itself.
+configMapGenerator:
+- name: cloudflared
+  files:
+  - config.yaml=cloudflared-config.yaml

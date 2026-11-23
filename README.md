@@ -80,7 +80,8 @@ flowchart LR
 
 - Flux watches `./clusters/stage`, which defines three Flux `Kustomization`s: `apps`, `infra-controllers` and `infra-configs`. Each one points at a directory in this repo, has `prune: true` (anything deleted from Git is deleted from the cluster), and decrypts SOPS secrets with the `sops-age` key.
 - Renovate runs as a daily CronJob in the cluster and opens a PR for each new image version or digest in the plain manifests, and for each Flux release. Merging the PR is the deploy. HelmRelease chart versions aren't covered yet (Renovate's `flux` manager isn't pointed at `infra/`), so charts are bumped by hand for now.
-- Kubernetes doesn't restart pods when a ConfigMap or Secret changes, and Flux only applies the new object. Reloader closes that gap for deployments annotated with `reloader.stakater.com/auto: "true"`: it rolls them when their ConfigMaps or Secrets change. Today that's only Homepage; a change to the cloudflared or Audiobookshelf ConfigMaps needs a `kubectl rollout restart`.
+- Kubernetes doesn't restart pods when a ConfigMap or Secret changes, and Flux only applies the new object. Reloader closes that gap for deployments annotated with `reloader.stakater.com/auto: "true"`: it rolls them when their ConfigMaps or Secrets change. It's used where the config is applied by a different Flux Kustomization than the workload: Homepage, whose config lives in `infra-configs`.
+- Config built in the same overlay as its workload uses a Kustomize `configMapGenerator` instead: the apps' ConfigMaps (cloudflared's `config.yaml`, Audiobookshelf's environment). Kustomize adds a hash of the content to the ConfigMap's name and updates the Deployment's reference, so any config change alters the pod template and rolls the pods, with no extra controller. Flux prunes the old ConfigMap. Each workload uses one mechanism, never both.
 
 ## What's running
 
@@ -112,7 +113,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   ├── base/                   # Deployment, Service, PVC, Namespace per app
 │   │   ├── audiobookshelf/
 │   │   └── linkding/
-│   └── stage/                  # + cloudflared tunnel, encrypted Secrets, temporary Ingress
+│   └── stage/                  # + cloudflared tunnel and its config, encrypted Secrets, temporary Ingress
 ├── infra/
 │   ├── controllers/            # Cluster services: homepage, kube-prometheus-stack, reloader, renovate, tailscale, truenas-csi
 │   │   ├── base/
@@ -173,7 +174,7 @@ SOPS_AGE_KEY_FILE=/path/to/age.agekey sops --config clusters/stage/.sops.yaml <f
 ### Adding an app
 
 1. Create `apps/base/<app>/` with a Namespace, Deployment, Service, any PVCs and a `kustomization.yaml`.
-2. Create `apps/stage/<app>/` with a `kustomization.yaml` that references `../../base/<app>/`, plus a `cloudflared` tunnel if the app should be public or an Ingress if it should be private.
+2. Create `apps/stage/<app>/` with a `kustomization.yaml` that references `../../base/<app>/`, plus a `cloudflared` tunnel (Deployment in `cloudflare.yaml`, config in `cloudflared-config.yaml` turned into a ConfigMap by `configMapGenerator`) if the app should be public, or an Ingress if it should be private.
 3. Commit and push. `apps/stage/` has no top-level `kustomization.yaml`, so Flux generates one and picks up every app directory automatically.
 
 ## Roadmap
