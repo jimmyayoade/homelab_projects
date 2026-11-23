@@ -47,8 +47,6 @@ flowchart LR
     ts -->|routes LAN subnet| traefik
     lanuser --> traefik
 
-    traefik -.->|booky.* · temporary| linkding
-    traefik -.->|abs.* · temporary| abs
     traefik -->|homepage.*| homepage
     traefik -->|grafana.* · TLS| grafana
 ```
@@ -61,7 +59,7 @@ There are three ways in:
 | **Tailscale** | Me, from anywhere | A Tailscale DaemonSet advertises the home LAN as a subnet route, so my devices reach the cluster's ingress (and anything else on the LAN) as if they were at home. Each node gets its own Tailscale identity. It also advertises itself as an exit node, but that isn't approved in the Tailscale console, so it isn't used. |
 | **Traefik ingress** | LAN and tailnet clients | Private hostnames under `jimmyalabs.org` for admin tools (Homepage, Grafana) that are never exposed publicly. |
 
-Linkding and Audiobookshelf also have temporary private ingresses (`booky.*`, `abs.*`, the dashed lines in the diagram). These will be removed, leaving the Cloudflare tunnel as the only way into those apps.
+Linkding and Audiobookshelf have no Traefik ingress: the Cloudflare tunnel is the only way into them, from home too.
 
 ### How changes get to the cluster
 
@@ -113,7 +111,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   ├── base/                   # Deployment, Service, PVC, Namespace per app
 │   │   ├── audiobookshelf/
 │   │   └── linkding/
-│   └── stage/                  # + cloudflared tunnel and its config, encrypted Secrets, temporary Ingress
+│   └── stage/                  # + cloudflared tunnel and its config, encrypted Secrets
 ├── infra/
 │   ├── controllers/            # Cluster services: homepage, kube-prometheus-stack, reloader, renovate, tailscale, truenas-csi
 │   │   ├── base/
@@ -179,7 +177,7 @@ SOPS_AGE_KEY_FILE=/path/to/age.agekey sops --config clusters/stage/.sops.yaml <f
 
 ## Roadmap
 
-- [ ] Remove the temporary private ingresses for Linkding and Audiobookshelf (`booky.*`, `abs.*`)
+- [x] Remove the temporary private ingresses for Linkding and Audiobookshelf (`booky.*`, `abs.*`)
 - [x] Move the Grafana admin password into a SOPS-encrypted Secret
 - [ ] CI on pull requests: `kustomize build` + `kubeconform` for every overlay
 - [ ] Pin the remaining `:latest` images (`cloudflared`, `renovate`)

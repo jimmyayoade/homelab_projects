@@ -5,7 +5,6 @@ resources:
 - ../../base/linkding/
 - cloudflare.yaml
 - cloudflare-secret.yaml
-- ingress.yaml
 - linkding-env-secret.yaml
 # The content hash kustomize adds to the name changes the Deployment's
 # pod template, so a config edit rolls the cloudflared pods by itself.
