@@ -3,4 +3,3 @@ kind: Kustomization
 namespace: homepage
 resources:
 - configmap.yaml
-- secret.yaml
