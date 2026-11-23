@@ -1,6 +1,6 @@
 # homelab_projects
 
-GitOps configuration for my home Kubernetes cluster. Everything running on the cluster is declared in this repo and reconciled by [Flux](https://fluxcd.io/): I push to `main`, and the cluster changes to match within a minute. Secrets are encrypted in Git with [SOPS](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age), and container images and charts are kept current by a [Renovate](https://docs.renovatebot.com/) bot that runs inside the cluster.
+GitOps configuration for my home Kubernetes cluster. Everything running on the cluster is declared in this repo and reconciled by [Flux](https://fluxcd.io/): I push to `main`, and the cluster changes to match within a minute. Secrets are encrypted in Git with [SOPS](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age), and container images are kept current by a [Renovate](https://docs.renovatebot.com/) bot that runs inside the cluster.
 
 ## Architecture
 
@@ -58,7 +58,7 @@ There are three ways in:
 | Path | Who uses it | How it works |
 | --- | --- | --- |
 | **Cloudflare Tunnel** | Anyone on the internet | Each public app runs its own `cloudflared` deployment (2 replicas) that dials *out* to Cloudflare, so no ports are opened on my router. Used for Linkding and Audiobookshelf. |
-| **Tailscale** | Me, from anywhere | A Tailscale DaemonSet advertises the home LAN as a subnet route (and acts as an exit node), so my devices reach the cluster's ingress as if they were at home. Each node gets its own Tailscale identity. |
+| **Tailscale** | Me, from anywhere | A Tailscale DaemonSet advertises the home LAN as a subnet route, so my devices reach the cluster's ingress (and anything else on the LAN) as if they were at home. Each node gets its own Tailscale identity. It also advertises itself as an exit node, but that isn't approved in the Tailscale console, so it isn't used. |
 | **Traefik ingress** | LAN and tailnet clients | Private hostnames under `jimmyalabs.org` for admin tools (Homepage, Grafana) that are never exposed publicly. |
 
 Linkding and Audiobookshelf also have temporary private ingresses (`booky.*`, `abs.*`, the dashed lines in the diagram). These will be removed, leaving the Cloudflare tunnel as the only way into those apps.
@@ -79,8 +79,8 @@ flowchart LR
 ```
 
 - Flux watches `./clusters/stage`, which defines three Flux `Kustomization`s: `apps`, `infra-controllers` and `infra-configs`. Each one points at a directory in this repo, has `prune: true` (anything deleted from Git is deleted from the cluster), and decrypts SOPS secrets with the `sops-age` key.
-- Renovate runs as a daily CronJob in the cluster and opens a PR for each new image digest, chart version or Flux release. Merging the PR is the deploy.
-- Reloader restarts deployments annotated with `reloader.stakater.com/auto: "true"` whenever their ConfigMaps or Secrets change, so a config edit in Git rolls the pods automatically.
+- Renovate runs as a daily CronJob in the cluster and opens a PR for each new image version or digest in the plain manifests, and for each Flux release. Merging the PR is the deploy. HelmRelease chart versions aren't covered yet (Renovate's `flux` manager isn't pointed at `infra/`), so charts are bumped by hand for now.
+- Kubernetes doesn't restart pods when a ConfigMap or Secret changes, and Flux only applies the new object. Reloader closes that gap for deployments annotated with `reloader.stakater.com/auto: "true"`: it rolls them when their ConfigMaps or Secrets change. Today that's only Homepage; a change to the cloudflared or Audiobookshelf ConfigMaps needs a `kubectl rollout restart`.
 
 ## What's running
 
@@ -89,7 +89,7 @@ flowchart LR
 | [Linkding](https://github.com/sissbruecker/linkding) | apps | Self-hosted bookmark manager | Plain manifests |
 | [Audiobookshelf](https://www.audiobookshelf.org/) | apps | Audiobook and podcast server | Plain manifests |
 | [Homepage](https://gethomepage.dev/) | infra | Dashboard that auto-discovers services from ingress annotations | Plain manifests |
-| [Tailscale](https://tailscale.com/) | infra | Subnet router and exit node for remote access | Plain manifests (DaemonSet) |
+| [Tailscale](https://tailscale.com/) | infra | Subnet router for remote access to the LAN | Plain manifests (DaemonSet) |
 | [Renovate](https://docs.renovatebot.com/) | infra | Automated dependency update PRs | CronJob |
 | [Reloader](https://github.com/stakater/Reloader) | infra | Restarts pods on config/secret changes | Flux `HelmRelease` |
 | [TrueNAS CSI](https://github.com/truenas/truenas-csi) | infra | Provisions PVCs on the TrueNAS NAS over iSCSI (`truenas-iscsi`) and NFS (`truenas-nfs`) | Flux `HelmRelease` |
@@ -112,7 +112,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   ├── base/                   # Deployment, Service, PVC, Namespace per app
 │   │   ├── audiobookshelf/
 │   │   └── linkding/
-│   └── stage/                  # + cloudflared tunnel, encrypted tunnel creds, temporary Ingress
+│   └── stage/                  # + cloudflared tunnel, encrypted Secrets, temporary Ingress
 ├── infra/
 │   ├── controllers/            # Cluster services: homepage, kube-prometheus-stack, reloader, renovate, tailscale, truenas-csi
 │   │   ├── base/
@@ -126,13 +126,13 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 
 - **No plaintext secrets in Git.** Every `Secret` is SOPS-encrypted with age before it's committed. Only the `data`/`stringData` values are encrypted, so diffs stay readable. Flux decrypts them in-cluster with a private key that never leaves the cluster.
 - **No inbound ports.** Public apps are reached only through outbound Cloudflare tunnels, and admin access goes over Tailscale.
-- **Hardened containers.** Workloads run as non-root users with `allowPrivilegeEscalation: false`. Where the app allows it, all Linux capabilities are dropped, a `RuntimeDefault` seccomp profile is applied and the root filesystem is read-only. The Tailscale pod adds back only `NET_ADMIN` and `NET_RAW`.
+- **Hardened containers.** Linkding, Audiobookshelf and Homepage run as non-root users with `allowPrivilegeEscalation: false`; Homepage also drops all Linux capabilities, uses a `RuntimeDefault` seccomp profile and a read-only root filesystem, and is the model for the rest. cloudflared and Renovate don't set a security context yet. The Tailscale pod has a read-only root filesystem and drops all capabilities except `NET_ADMIN` and `NET_RAW`; its auth key is mounted as a file, not passed in an environment variable. The TrueNAS CSI node plugin runs privileged in its own namespace, since it has to mount volumes on the host.
 - **Least-privilege RBAC.** Homepage gets a `get`/`list`-only ClusterRole for the resources it reads. Tailscale's Role is scoped to its own namespace's Secrets.
 - **Pinned images.** Most images are pinned by `sha256` digest, and Renovate bumps them through reviewed PRs.
 
 ## Bootstrapping a cluster from this repo
 
-Prerequisites: a running Kubernetes cluster with Traefik as the ingress controller, `kubectl`, the [`flux` CLI](https://fluxcd.io/flux/installation/), `sops`, `age`, and a GitHub personal access token.
+Prerequisites: a running Kubernetes cluster with Traefik as the ingress controller (k3s ships it), `open-iscsi` and `nfs-common` on every node for the TrueNAS volumes, `kubectl`, the [`flux` CLI](https://fluxcd.io/flux/installation/), `sops`, `age`, and a GitHub personal access token.
 
 1. **Install the age key** so Flux can decrypt secrets:
 
