@@ -33,7 +33,7 @@ data:
             href: https://audiobook.jimmyalabs.org/
             description: this is for audiobooks local
         - Kube Prometheus stack:
-            href: grafana.jimmyalabs.org
+            href: https://grafana.jimmyalabs.org
             description: monitoring dashboard
 
     - Bookmarks:
