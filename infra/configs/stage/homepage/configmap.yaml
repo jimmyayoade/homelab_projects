@@ -8,10 +8,6 @@ data:
   kubernetes.yaml: |
     mode: cluster
   settings.yaml: ""
-  #settings.yaml: |
-  #  providers:
-  #    longhorn:
-  #      url: https://longhorn.my.network
   custom.css: ""
   custom.js: ""
   bookmarks.yaml: |
@@ -42,7 +38,7 @@ data:
             description: News about hacks.
         - Drive and Listen:
             href: https://driveandlisten.app/
-            description: drive and listen in various cities.
+            description: Drive and listen in various cities.
   widgets.yaml: |
     - kubernetes:
         cluster:
