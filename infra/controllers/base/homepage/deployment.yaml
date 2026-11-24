@@ -20,7 +20,9 @@ spec:
         app.kubernetes.io/name: homepage
     spec:
       serviceAccountName: homepage
-      automountServiceAccountToken: true
+      # The API token is mounted explicitly below (kube-api-access), so the
+      # automatic one is off. Homepage needs it to read the cluster.
+      automountServiceAccountToken: false
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       securityContext:
@@ -87,6 +89,9 @@ spec:
           subPath: widgets.yaml
         - mountPath: /app/config/logs
           name: logs
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: kube-api-access
+          readOnly: true
       volumes:
       - name: writable-config-dir
         emptyDir: {}
@@ -95,3 +100,23 @@ spec:
           name: homepage
       - name: logs
         emptyDir: {}
+      # Short-lived token bound to this pod: the kubelet renews it before it
+      # expires and it stops working when the pod is deleted. Same files the
+      # automatic mount provides (token, ca.crt, namespace), at the same path.
+      - name: kube-api-access
+        projected:
+          defaultMode: 0444
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 3600
+          - configMap:
+              name: kube-root-ca.crt
+              items:
+              - key: ca.crt
+                path: ca.crt
+          - downwardAPI:
+              items:
+              - path: namespace
+                fieldRef:
+                  fieldPath: metadata.namespace
