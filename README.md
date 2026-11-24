@@ -127,7 +127,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 - **No inbound ports.** Public apps are reached only through outbound Cloudflare tunnels, and admin access goes over Tailscale.
 - **Hardened containers.** Linkding, Audiobookshelf and Homepage run as non-root users with `allowPrivilegeEscalation: false`; Homepage also drops all Linux capabilities and uses a `RuntimeDefault` seccomp profile, and is the model for the rest (its root filesystem isn't read-only yet). cloudflared and Renovate don't set a security context yet. The Tailscale pod has a read-only root filesystem and drops all capabilities except `NET_ADMIN` and `NET_RAW`; its auth key is mounted as a file, not passed in an environment variable. The TrueNAS CSI node plugin runs privileged in its own namespace, since it has to mount volumes on the host.
 - **Least-privilege RBAC.** Homepage gets a `get`/`list`-only ClusterRole for the resources it reads, and reaches the API with a short-lived token bound to its pod (an explicit projected `serviceAccountToken` volume, renewed by the kubelet), not a long-lived token Secret. Tailscale's Role is scoped to its own namespace's Secrets.
-- **Pinned images.** Most images are pinned by `sha256` digest, and Renovate bumps them through reviewed PRs.
+- **Pinned images.** Every image in the plain manifests, plus the Reloader and TrueNAS CSI chart images, is pinned as `tag@sha256:digest`: the kubelet pulls the digest, so a re-pushed tag can't change what runs, and the tag says which version it is. Renovate bumps both through reviewed PRs. The kube-prometheus-stack images still come from the chart's own tags, pinned only through the chart version.
 
 ## Bootstrapping a cluster from this repo
 
@@ -180,7 +180,7 @@ SOPS_AGE_KEY_FILE=/path/to/age.agekey sops --config clusters/stage/.sops.yaml <f
 - [x] Remove the temporary private ingresses for Linkding and Audiobookshelf (`booky.*`, `abs.*`)
 - [x] Move the Grafana admin password into a SOPS-encrypted Secret
 - [ ] CI on pull requests: `kustomize build` + `kubeconform` for every overlay
-- [ ] Pin the remaining `:latest` images (`cloudflared`, `renovate`)
+- [x] Pin every image by tag and digest (no `:latest` left)
 - [ ] Resource requests/limits and readiness probes on every workload
 - [ ] Switch from Flannel to Cilium as my CNI
 - [ ] NetworkPolicies between namespaces
