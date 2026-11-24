@@ -37,7 +37,7 @@ spec:
       volumes:
       - name: creds
         secret:
-          secretName: audiobook-tunnel-credentials
+          secretName: tunnel-credentials
       - name: config
         configMap:
           name: cloudflared
