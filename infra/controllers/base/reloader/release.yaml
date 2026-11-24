@@ -22,7 +22,8 @@ spec:
       retries: 3
   values:
     image:
-      digest: sha256:0a27b89b62a4207e955afeb94a515145ea8f7a24ae6b22a60b9aff54edefb12a
+      tag: v1.4.25
+      digest: sha256:db8b1818f5da373ab85c05b30220fcae80a9ac0532052e6d68a6a5999111f18f
     reloader:
       watchGlobally: true
       enableHA: true
