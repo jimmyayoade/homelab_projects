@@ -27,7 +27,7 @@ data:
     - My Home Services:
         - Audio Book Shelf:
             href: https://audiobook.jimmyalabs.org/
-            description: this is for audiobooks local
+            description: this is for audiobooks
         - Kube Prometheus stack:
             href: https://grafana.jimmyalabs.org
             description: monitoring dashboard
