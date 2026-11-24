@@ -7,8 +7,6 @@ spec:
   schedule: '@daily'
   concurrencyPolicy: Forbid
   jobTemplate:
-    metadata:
-      name: renovate
     spec:
       template:
         spec:
