@@ -77,7 +77,7 @@ flowchart LR
 ```
 
 - Flux watches `./clusters/stage`, which defines three Flux `Kustomization`s: `apps`, `infra-controllers` and `infra-configs`. Each one points at a directory in this repo, has `prune: true` (anything deleted from Git is deleted from the cluster), and decrypts SOPS secrets with the `sops-age` key. `apps` and `infra-configs` have `dependsOn: infra-controllers`, so Flux applies them only once the controllers are Ready: the configs need the namespaces the controllers create, and apps come after the cluster services they run on. The flip side is that a failing controller also holds back app changes until it's fixed.
-- Renovate runs as a daily CronJob in the cluster and opens a PR for each new image version or digest in the plain manifests, and for each Flux release. Merging the PR is the deploy. HelmRelease chart versions aren't covered yet (Renovate's `flux` manager isn't pointed at `infra/`), so charts are bumped by hand for now.
+- Renovate runs as a daily CronJob in the cluster and opens a PR for each new image version or digest in the plain manifests, for each HelmRelease chart version (the `flux` manager reads the HelmReleases and HelmRepositories under `infra/`), and for each Flux release. Merging the PR is the deploy. `pinDigests` is on, so an image with only a tag gets a PR adding its digest.
 - Kubernetes doesn't restart pods when a ConfigMap or Secret changes, and Flux only applies the new object. Reloader closes that gap for deployments annotated with `reloader.stakater.com/auto: "true"`: it rolls them when their ConfigMaps or Secrets change. It's used where the config is applied by a different Flux Kustomization than the workload: Homepage, whose config lives in `infra-configs`.
 - Config built in the same overlay as its workload uses a Kustomize `configMapGenerator` instead: the apps' ConfigMaps (cloudflared's `config.yaml`, Audiobookshelf's environment). Kustomize adds a hash of the content to the ConfigMap's name and updates the Deployment's reference, so any config change alters the pod template and rolls the pods, with no extra controller. Flux prunes the old ConfigMap. Each workload uses one mechanism, never both.
 
@@ -118,7 +118,7 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   │   └── stage/
 │   └── configs/                # Configuration for those services (homepage config)
 │       └── stage/
-└── renovate.json               # Lets Renovate find images in every *.yaml file
+└── renovate.json               # Renovate: images in every *.yaml, Helm charts under infra/, digest pinning
 ```
 
 ## Security practices

@@ -1,8 +1,10 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "kubernetes": {
-        "fileMatch": [
-            "\\.yaml$"
-        ]
-    }
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "kubernetes": {
+    "managerFilePatterns": ["/\\.yaml$/"]
+  },
+  "flux": {
+    "managerFilePatterns": ["/^(clusters|infra)/.+\\.yaml$/"]
+  },
+  "pinDigests": true
 }
