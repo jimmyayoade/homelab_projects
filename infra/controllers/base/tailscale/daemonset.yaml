@@ -41,7 +41,7 @@ spec:
           value: "false"
         # Each node gets its own Secret, named after the node
         # it's running on. This is what keeps two pods from
-        # fighting over one device identity since its being deployed
+        # fighting over one device identity since it's being deployed
         # as a daemonset
         - name: TS_KUBE_SECRET
           valueFrom:
