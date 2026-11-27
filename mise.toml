@@ -1,0 +1,7 @@
+# Tools for scripts/validate.sh. CI installs these same versions
+# (jdx/mise-action), so a check that passes locally passes in CI.
+# Renovate keeps them current.
+[tools]
+kustomize = "5.8.3"
+kubeconform = "0.8.0"
+yq = "4.54.3"

@@ -1,0 +1,11 @@
+# Editors that read this (most do, natively or with a plugin) keep files the
+# way scripts/validate.sh checks for: final newline, no trailing spaces.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2

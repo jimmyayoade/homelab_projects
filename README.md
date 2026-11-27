@@ -118,8 +118,33 @@ The repo uses Flux's recommended **base / overlay** pattern: `base/` holds envir
 │   │   └── stage/
 │   └── configs/                # Configuration for those services (homepage config)
 │       └── stage/
-└── renovate.json               # Renovate: images in every *.yaml, Helm charts under infra/, digest pinning
+├── scripts/validate.sh         # Repo checks, run by CI and locally (see Validation)
+├── .github/workflows/          # CI: runs the checks on every pull request and push to main
+├── mise.toml                   # Pinned versions of the tools the checks use
+├── .editorconfig               # Final newline, no trailing spaces, 2-space indent
+└── renovate.json               # Renovate: images in every *.yaml, Helm charts under infra/, digest pinning, GitHub Actions
 ```
+
+## Validation
+
+`scripts/validate.sh` checks the repo before Flux sees it. GitHub Actions runs it on every pull request (Renovate's included) and on every push to `main`. Run it locally with the same tool versions:
+
+```sh
+mise install            # kustomize, kubeconform, yq at the versions in mise.toml
+scripts/validate.sh
+```
+
+It runs every check even after a failure, so one run lists every problem:
+
+- **YAML parses**, for every `.yaml` file.
+- **Every `kustomization.yaml` builds**, bases included, so a base is valid on its own and not only through an overlay.
+- **Schemas:** the built overlays and the Flux objects in `clusters/stage/` are validated with `kubeconform -strict` against Kubernetes 1.34.5 (the cluster's version) and Flux's own CRD schemas, at the version `gotk-components.yaml` was generated with. Strict mode catches unknown fields such as a misspelled key. Secrets are skipped here, since SOPS adds a top-level `sops:` key.
+- **Images are pinned** as `tag@sha256:digest` in every pod spec, and chart images set through HelmRelease values have a digest.
+- **Every `volumeMount` names a volume that exists.** The API server rejects the pod otherwise, which fails the whole Flux Kustomization.
+- **Every Secret is SOPS-encrypted**: it has a `sops:` block and every `data`/`stringData` value is `ENC[...]`.
+- **Whitespace:** no trailing spaces, and a final newline on every file.
+
+Each check was tested by breaking the repo on purpose and confirming the script fails. Not covered yet: HelmRelease `values` aren't rendered through their charts, so a wrong chart value only shows up when Flux installs it; and resource requests aren't enforced until every workload has them (see Roadmap). The workflow uses a read-only token, and its actions are pinned by commit SHA.
 
 ## Security practices
 
@@ -179,7 +204,7 @@ SOPS_AGE_KEY_FILE=/path/to/age.agekey sops --config clusters/stage/.sops.yaml <f
 
 - [x] Remove the temporary private ingresses for Linkding and Audiobookshelf (`booky.*`, `abs.*`)
 - [x] Move the Grafana admin password into a SOPS-encrypted Secret
-- [ ] CI on pull requests: `kustomize build` + `kubeconform` for every overlay
+- [x] CI on pull requests and pushes: builds, `kubeconform`, image pins, volumes, SOPS, whitespace (`scripts/validate.sh`)
 - [x] Pin every image by tag and digest (no `:latest` left)
 - [ ] Resource requests/limits and readiness probes on every workload
 - [ ] Switch from Flannel to Cilium as my CNI
